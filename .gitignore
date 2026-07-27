@@ -1,0 +1,22 @@
+# Node
+web/node_modules/
+web/.next/
+web/out/
+web/build/
+web/.env*.local
+
+# Python
+server/__pycache__/
+server/.pytest_cache/
+server/.venv/
+server/venv/
+*.pyc
+
+# Project specific
+server/weights/*.pt
+!server/weights/.gitkeep
+server/outputs/*
+!server/outputs/.gitkeep
+server/logs/*
+!server/logs/.gitkeep
+.env
