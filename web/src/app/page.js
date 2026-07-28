@@ -271,7 +271,7 @@ export default function Dashboard() {
                 isDragActive ? "border-slate-800 bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
               }`}
             >
-              <input {...getInputProps({ capture: "environment" })} />
+              <input {...getInputProps()} />
               {preview ? (
                 <div className="w-full h-full relative group">
                   <img src={preview} alt="Preview" className="w-full h-full object-contain rounded" />
