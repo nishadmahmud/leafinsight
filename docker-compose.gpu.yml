@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      args:
+        # Override the default CPU install to fetch the heavy CUDA (GPU) version
+        TORCH_INDEX_URL: https://download.pytorch.org/whl/cu121
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - ENV=production

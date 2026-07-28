@@ -8,6 +8,7 @@ from app.schemas.detection import DetectionResponse, ComparisonResponse
 from app.schemas.explainability import ExplainResponse
 from app.schemas.benchmark import BenchmarkResponse
 from app.core.config import settings
+from app.core.model_manager import model_manager
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ async def detect(
     """
     Run detection using a single selected YOLO model.
     """
-    if model_name not in settings.AVAILABLE_MODELS:
+    if model_name not in model_manager.get_loaded_models():
         raise HTTPException(status_code=400, detail=f"Model {model_name} is not supported.")
         
     image_bytes = await image.read()
@@ -40,7 +41,8 @@ async def compare(
     """
     Run detection on multiple models simultaneously.
     """
-    model_names = [m.strip() for m in models.split(',') if m.strip() in settings.AVAILABLE_MODELS]
+    loaded_models = model_manager.get_loaded_models()
+    model_names = [m.strip() for m in models.split(',') if m.strip() in loaded_models]
     if not model_names:
         raise HTTPException(status_code=400, detail="No valid models selected for comparison.")
         
@@ -59,7 +61,7 @@ async def explain(
     """
     Generate an Explainable AI heatmap for the detected bounding box.
     """
-    if model_name not in settings.AVAILABLE_MODELS:
+    if model_name not in model_manager.get_loaded_models():
         raise HTTPException(status_code=400, detail=f"Model {model_name} is not supported.")
         
     image_bytes = await image.read()
@@ -76,7 +78,8 @@ async def benchmark(
     """
     Benchmark memory, CPU, and inference latency for selected models.
     """
-    model_names = [m.strip() for m in models.split(',') if m.strip() in settings.AVAILABLE_MODELS]
+    loaded_models = model_manager.get_loaded_models()
+    model_names = [m.strip() for m in models.split(',') if m.strip() in loaded_models]
     if not model_names:
         raise HTTPException(status_code=400, detail="No valid models selected for benchmarking.")
         

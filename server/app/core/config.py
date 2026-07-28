@@ -11,8 +11,6 @@ class Settings(BaseSettings):
     WEIGHTS_DIR: Path = BASE_DIR / "weights"
     OUTPUTS_DIR: Path = BASE_DIR / "outputs"
     
-    # Model Configurations
-    AVAILABLE_MODELS: List[str] = ["yolov8s", "yolov9s", "yolov11s"]
     
     class Config:
         env_file = ".env"

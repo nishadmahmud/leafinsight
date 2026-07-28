@@ -18,7 +18,7 @@ class ExplainabilityService:
         return colored_heatmap, overlay
 
     @classmethod
-    def _run_occlusion(cls, model, image: np.ndarray, class_id: int, base_conf: float, box_size: int = 50, step: int = 50) -> np.ndarray:
+    def _run_occlusion(cls, model, image: np.ndarray, class_id: int, base_conf: float, box_size: int = 10, step: int = 10) -> np.ndarray:
         """
         Slide a gray box across the image and record the drop in confidence for the target class.
         """
@@ -68,12 +68,12 @@ class ExplainabilityService:
             mask = np.random.rand(s, s) < p1
             mask = mask.astype(np.float32)
             
-            # Upsample
-            up_mask = cv2.resize(mask, (up_size[1], up_size[0]), interpolation=cv2.INTER_LINEAR)
+            # Upsample (INTER_NEAREST creates the blocky grid effect seen in the paper)
+            up_mask = cv2.resize(mask, (up_size[1], up_size[0]), interpolation=cv2.INTER_NEAREST)
             
-            # Random shift
-            shift_x = np.random.randint(0, int(cell_size[1]))
-            shift_y = np.random.randint(0, int(cell_size[0]))
+            # No random shift (to preserve the perfect 8x8 grid seen in the paper)
+            shift_x = 0
+            shift_y = 0
             
             crop_mask = up_mask[shift_y:shift_y + h, shift_x:shift_x + w]
             

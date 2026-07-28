@@ -22,22 +22,24 @@ class ModelManager:
     def load_models(self):
         """
         Load all YOLO models from the weights directory into memory.
-        If a weights file is missing, it skips it (useful for initial dev).
+        Automatically scans for any .pt files in the weights folder.
         """
         logger.info("Initializing ModelManager and loading models...")
-        for model_name in settings.AVAILABLE_MODELS:
-            weight_path = settings.WEIGHTS_DIR / f"{model_name}.pt"
-            if weight_path.exists():
-                try:
-                    # Load model on CPU by default to save resources
-                    model = YOLO(str(weight_path))
-                    # Optionally force CPU if needed: model.to('cpu')
-                    self._models[model_name] = model
-                    logger.info(f"Successfully loaded {model_name}")
-                except Exception as e:
-                    logger.error(f"Failed to load {model_name}: {e}")
-            else:
-                logger.warning(f"Weights file not found for {model_name} at {weight_path}. Model not loaded.")
+        self._models.clear()
+        
+        if not settings.WEIGHTS_DIR.exists():
+            logger.warning(f"Weights directory {settings.WEIGHTS_DIR} does not exist.")
+            return
+
+        for weight_path in settings.WEIGHTS_DIR.glob("*.pt"):
+            model_name = weight_path.stem
+            try:
+                # Load model on CPU by default to save resources
+                model = YOLO(str(weight_path))
+                self._models[model_name] = model
+                logger.info(f"Successfully loaded {model_name}")
+            except Exception as e:
+                logger.error(f"Failed to load {model_name}: {e}")
 
     def get_model(self, model_name: str) -> Optional[YOLO]:
         """
