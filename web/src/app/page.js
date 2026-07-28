@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { UploadCloud, Image as ImageIcon, Loader2, Maximize, BarChart3, AlertCircle, X, Download, ChevronDown, ChevronUp, Shuffle, Leaf } from "lucide-react";
+import { UploadCloud, Image as ImageIcon, Loader2, Maximize, BarChart3, AlertCircle, X, Download, ChevronDown, ChevronUp, Shuffle, Leaf, Camera } from "lucide-react";
 import { compareModels, benchmarkModels, explainModel, getModels } from "@/services/api";
+import imageCompression from 'browser-image-compression';
 
 const SAMPLE_CATEGORIES = [
   { id: "Money_Plant_Bacterial_wilt_disease", label: "Bacterial Wilt", plant: "Money", color: "bg-emerald-500" },
@@ -129,10 +130,26 @@ export default function Dashboard() {
     fetchModels();
   }, []);
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
-      setFile(acceptedFiles[0]);
-      setPreview(URL.createObjectURL(acceptedFiles[0]));
+      const originalFile = acceptedFiles[0];
+      
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+
+      try {
+        const compressedFile = await imageCompression(originalFile, options);
+        setFile(compressedFile);
+        setPreview(URL.createObjectURL(compressedFile));
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        setFile(originalFile);
+        setPreview(URL.createObjectURL(originalFile));
+      }
+
       // Reset all previous results
       setDetectResults(null);
       setBenchmarkResults(null);
@@ -254,7 +271,7 @@ export default function Dashboard() {
                 isDragActive ? "border-slate-800 bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
               }`}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps({ capture: "environment" })} />
               {preview ? (
                 <div className="w-full h-full relative group">
                   <img src={preview} alt="Preview" className="w-full h-full object-contain rounded" />
@@ -264,8 +281,10 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <>
-                  <UploadCloud className="h-8 w-8 text-slate-400 mb-2" />
-                  <span className="text-sm font-medium text-slate-700">Drop leaf image here</span>
+                  <UploadCloud className="hidden md:block h-8 w-8 text-slate-400 mb-2" />
+                  <Camera className="md:hidden h-8 w-8 text-slate-400 mb-2" />
+                  <span className="hidden md:block text-sm font-medium text-slate-700">Drop leaf image here</span>
+                  <span className="md:hidden text-sm font-medium text-slate-700">Tap to upload or capture</span>
                 </>
               )}
             </div>
