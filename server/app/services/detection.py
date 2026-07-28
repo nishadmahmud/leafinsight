@@ -35,6 +35,12 @@ class DetectionService:
             label = f"{det.class_name} ({det.confidence:.2f})"
             (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
             
+            # Ensure label doesn't get cut off at the right edge
+            label_x1 = x1
+            img_w = img_copy.shape[1]
+            if label_x1 + w > img_w:
+                label_x1 = max(0, img_w - w)
+                
             # Ensure label doesn't get cut off at the top of the image
             if y1 - 20 < 0:
                 label_y1, label_y2 = y1, y1 + 20
@@ -43,8 +49,8 @@ class DetectionService:
                 label_y1, label_y2 = y1 - 20, y1
                 text_y = y1 - 5
                 
-            cv2.rectangle(img_copy, (x1, label_y1), (x1 + w, label_y2), (0, 255, 0), -1)
-            cv2.putText(img_copy, label, (x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            cv2.rectangle(img_copy, (label_x1, label_y1), (label_x1 + w, label_y2), (0, 255, 0), -1)
+            cv2.putText(img_copy, label, (label_x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
             
         return img_copy
 
